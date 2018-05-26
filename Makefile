@@ -12,7 +12,9 @@ GENERATOR_FILES=$(BUILDDIR)/lib/bindings.cmx		\
 LIBFILES=$(BUILDDIR)/lib/bindings.cmx			\
          $(BUILDDIR)/generated/vyosconfig_bindings.cmx	\
          $(BUILDDIR)/lib/apply_bindings.cmx		\
-         $(BUILDDIR)/generated/vyosconfig.o
+         $(BUILDDIR)/generated/vyosconfig.o		\
+         $(BUILDDIR)/lib/vyos1x_parser.cmx		\
+         $(BUILDDIR)/lib/vyos1x_lexer.cmx
 
 CAML_INIT=$(BUILDDIR)/stub/init.o
 
@@ -67,6 +69,11 @@ $(BUILDDIR)/%.cmx: %.ml
 
 $(GENERATOR): $(GENERATOR_FILES)
 	ocamlfind opt -o $@ -linkpkg -package $(PACKAGES) $^
+
+$(BUILDDIR)/lib/vyos1x_parser.cmx:
+	ocamllex lib/vyos1x_lexer.mll
+	menhir lib/vyos1x_parser.mly
+	ocamlfind opt -c -o $@ -package $(PACKAGES) lib/vyos1x_parser.ml lib/vyos1x_lexer.ml
 
 clean:
 	rm -rf $(BUILDDIR)
