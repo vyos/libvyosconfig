@@ -8,6 +8,15 @@ let make_config_tree name = Ctypes.Root.create (Config_tree.make name)
 let destroy c_ptr = 
     Root.release c_ptr
 
+let from_string s = 
+    try
+        let config = Vyos1x_parser.config Vyos1x_lexer.token (Lexing.from_string s) in
+        Ctypes.Root.create config
+    with _ -> Ctypes.null
+
+let render c_ptr =
+    Vyos1x_renderer.render (Root.get c_ptr)
+
 let set_add_value c_ptr path value =
     let ct = Root.get c_ptr in
     let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
@@ -56,6 +65,8 @@ struct
 
   let () = I.internal "make" (string @-> returning (ptr void)) make_config_tree
   let () = I.internal "destroy" ((ptr void) @-> returning void) destroy
+  let () = I.internal "from_string" (string @-> returning (ptr void)) from_string 
+  let () = I.internal "to_string"  ((ptr void) @-> returning string) render
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
   let () = I.internal "set_replace_value" ((ptr void) @-> string @-> string @-> returning int) set_replace_value
   let () = I.internal "set_valueless" ((ptr void) @-> string @-> returning int) set_valueless
