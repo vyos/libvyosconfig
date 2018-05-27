@@ -5,17 +5,19 @@ $(shell mkdir -p $(BUILDDIR) $(BUILDDIR)/stub $(BUILDDIR)/lib $(BUILDDIR)/stub_g
 PACKAGES=vyconf,ctypes.stubs,ctypes.foreign
 
 # The files used to build the stub generator.
-GENERATOR_FILES=$(BUILDDIR)/lib/bindings.cmx		\
+GENERATOR_FILES=$(BUILDDIR)/lib/vyos1x_parser.cmx	\
+                $(BUILDDIR)/lib/vyos1x_lexer.cmx        \
+                $(BUILDDIR)/lib/vyos1x_renderer.cmx	\
+                $(BUILDDIR)/lib/bindings.cmx		\
                 $(BUILDDIR)/stub_generator/generate.cmx
 
 # The files from which we'll build a shared library.
-LIBFILES=$(BUILDDIR)/lib/bindings.cmx			\
-         $(BUILDDIR)/generated/vyosconfig_bindings.cmx	\
-         $(BUILDDIR)/lib/apply_bindings.cmx		\
-         $(BUILDDIR)/generated/vyosconfig.o		\
-         $(BUILDDIR)/lib/vyos1x_parser.cmx		\
-         $(BUILDDIR)/lib/vyos1x_lexer.cmx		\
-         $(BUILDDIR)/lib/vyos1x_renderer.cmx
+LIBFILES=$(BUILDDIR)/lib/vyos1x_parser.cmx	\
+         $(BUILDDIR)/lib/vyos1x_lexer.cmx	\
+         $(BUILDDIR)/lib/vyos1x_renderer.cmx	\
+         $(BUILDDIR)/lib/bindings.cmx		\
+         $(BUILDDIR)/generated/vyosconfig_bindings.cmx  \
+         $(BUILDDIR)/lib/apply_bindings.cmx
 
 CAML_INIT=$(BUILDDIR)/stub/init.o
 
@@ -69,12 +71,26 @@ $(BUILDDIR)/%.cmx: %.ml
 	ocamlfind opt -c -o $@ -I $(BUILDDIR)/generated -I $(BUILDDIR)/lib -package $(PACKAGES) $<
 
 $(GENERATOR): $(GENERATOR_FILES)
-	ocamlfind opt -o $@ -linkpkg -package $(PACKAGES) $^
+	ocamlfind opt -o $@ -I $(BUILDDIR)/lib -linkpkg -package $(PACKAGES) $^
 
-$(BUILDDIR)/lib/vyos1x_parser.cmx:
-	ocamllex lib/vyos1x_lexer.mll
-	menhir lib/vyos1x_parser.mly
-	ocamlfind opt -c -o $@ -package $(PACKAGES) lib/vyos1x_parser.ml lib/vyos1x_lexer.ml
+$(BUILDDIR)/lib/vyos1x_lexer.ml:
+	ocamllex parser/vyos1x_lexer.mll -o $(BUILDDIR)/lib/vyos1x_lexer.ml
+
+$(BUILDDIR)/lib/vyos1x_lexer.cmx: $(BUILDDIR)/lib/vyos1x_lexer.ml $(BUILDDIR)/lib/vyos1x_parser.cmi
+	ocamlfind opt -o $@ -I $(BUILDDIR)/lib -linkpkg -package $(PACKAGES) $(BUILDDIR)/lib/vyos1x_lexer.ml
+
+$(BUILDDIR)/lib/vyos1x_parser.ml:
+	menhir parser/vyos1x_parser.mly
+	mv parser/vyos1x_parser.ml $(BUILDDIR)/lib
+
+$(BUILDDIR)/lib/vyos1x_parser.mli: $(BUILDDIR)/lib/vyos1x_parser.ml
+	mv parser/vyos1x_parser.mli $(BUILDDIR)/lib
+
+$(BUILDDIR)/lib/vyos1x_parser.cmi: $(BUILDDIR)/lib/vyos1x_parser.mli
+	ocamlfind opt -o $@ -I $(BUILDDIR)/lib -package $(PACKAGES) $^
+
+$(BUILDDIR)/lib/vyos1x_parser.cmx: $(BUILDDIR)/lib/vyos1x_parser.cmi $(BUILDDIR)/lib/vyos1x_lexer.cmx
+	ocamlfind opt -c -o $@ -package $(PACKAGES) -I $(BUILDDIR)/lib $(BUILDDIR)/lib/vyos1x_parser.ml $(BUILDDIR)/lib/vyos1x_lexer.ml
 
 clean:
 	rm -rf $(BUILDDIR)
