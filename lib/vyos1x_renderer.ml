@@ -81,7 +81,6 @@ and render_tag_node indent level parent node =
 let render node =
     let children = Vytree.children_of_node node in
     let child_configs = List.map (render_node 4 0) children in
-(*    List.fold_left (Printf.sprintf "%s\n%s") "" child_configs *)
     String.concat "" child_configs
      
 
