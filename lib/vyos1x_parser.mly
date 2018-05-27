@@ -80,9 +80,9 @@ tag_node:
   | comment = comments;
     name = IDENTIFIER; tag = value; LEFT_BRACE; children = list(node_content); RIGHT_BRACE
   {
-      let outer_node = Vytree.make_full default_data name [] in
+      let outer_node = Vytree.make_full {default_data with ephemeral=true} name [] in
       let inner_node =
-          Vytree.make_full {default_data with comment=comment; ephemeral=true} tag [] in
+          Vytree.make_full {default_data with comment=comment} tag [] in
       let inner_node = List.fold_left Vytree.adopt inner_node (List.rev children) |> Vytree.merge_children merge_data in
       let node = Vytree.adopt outer_node inner_node in
       try
