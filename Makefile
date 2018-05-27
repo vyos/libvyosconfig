@@ -14,7 +14,8 @@ LIBFILES=$(BUILDDIR)/lib/bindings.cmx			\
          $(BUILDDIR)/lib/apply_bindings.cmx		\
          $(BUILDDIR)/generated/vyosconfig.o		\
          $(BUILDDIR)/lib/vyos1x_parser.cmx		\
-         $(BUILDDIR)/lib/vyos1x_lexer.cmx
+         $(BUILDDIR)/lib/vyos1x_lexer.cmx		\
+         $(BUILDDIR)/lib/vyos1x_renderer.cmx
 
 CAML_INIT=$(BUILDDIR)/stub/init.o
 
