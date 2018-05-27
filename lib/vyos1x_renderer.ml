@@ -29,7 +29,8 @@ let render_values indent_str name values =
     | [v] -> Printf.sprintf "%s%s %s\n" indent_str name v
     | _  -> 
         let rendered = List.map (fun s -> Printf.sprintf "%s%s %s" indent_str name s) values in
-        String.concat "\n" rendered
+        let rendered = String.concat "\n" rendered in
+        Printf.sprintf "%s\n" rendered
 
 let render_comment indent c =
     match c with
@@ -46,18 +47,18 @@ let rec render_node indent level node =
     let values = render_values indent_str name data.values in
     let children = VT.children_of_node node in
     match children with
-    | [] -> Printf.sprintf "%s\n%s" comment values
+    | [] -> Printf.sprintf "%s%s" comment values
     | _ ->
         if is_tag then 
             begin
-                let inner = List.map (render_tag_node indent (level + 1) name) children in
-                String.concat "\n" inner
+                let inner = List.map (render_tag_node indent level name) children in
+                String.concat "" inner
             end
         else
             begin
                 let inner = List.map (render_node indent (level + 1)) children in
-                let inner = String.concat "\n" inner in
-                Printf.sprintf "%s%s%s {\n%s\n%s}\n" indent_str comment name inner indent_str
+                let inner = String.concat "" inner in
+                Printf.sprintf "%s%s%s {\n%s%s}\n" comment indent_str name inner indent_str
             end
 
 and render_tag_node indent level parent node =
@@ -74,9 +75,14 @@ and render_tag_node indent level parent node =
         (* Exploiting the fact that immediate children of tag nodes are
            never themselves tag nodes *)
         let inner = List.map (render_node indent (level + 1)) children in
-        let inner = String.concat "\n" inner in
-        Printf.sprintf "%s%s%s %s {\n%s\n%s}\n" indent_str comment parent name inner indent_str
+        let inner = String.concat "" inner in
+        Printf.sprintf "%s%s%s %s {\n%s%s}\n" comment indent_str parent name inner indent_str
 
+let render node =
+    let children = Vytree.children_of_node node in
+    let child_configs = List.map (render_node 4 0) children in
+(*    List.fold_left (Printf.sprintf "%s\n%s") "" child_configs *)
+    String.concat "" child_configs
      
 
     
