@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+DIR := debian/tmp
+
+%:
+	dh $@ --with quilt
+
+override_dh_auto_build:
+	./build.sh $(DIR)
+
+override_dh_auto_install:
+	mkdir -p $(DIR)/usr/lib
+	cp _build/libvyosconfig.so $(DIR)/usr/lib/libvyosconfig.so.0
+	dh_makeshlibs
+
+override_dh_auto_test:
+	echo "No tests yet"
