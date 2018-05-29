@@ -1,0 +1,16 @@
+Source: libvyosconfig0
+Section: contrib/net
+Priority: extra
+Maintainer: VyOS Package Maintainers <maintainers@vyos.net>
+Build-Depends: debhelper (>= 9),
+  quilt,
+  libpcre3-dev,
+  libffi-dev
+Standards-Version: 3.9.6
+
+Package: libvyosconfig0
+Architecture: any
+Depends: ${shlibs:Depends},
+  ${misc:Depends}
+Description: VyConf config tree manipulation library
+  VyConf config tree parsing and manipulation library

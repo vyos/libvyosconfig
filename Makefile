@@ -95,13 +95,3 @@ $(BUILDDIR)/lib/vyos1x_parser.cmx: $(BUILDDIR)/lib/vyos1x_parser.cmi $(BUILDDIR)
 
 clean:
 	rm -rf $(BUILDDIR)
-
-test: all
-	$(MAKE) -C $@
-ifeq ($(OSTYPE),Win32)
-	PATH="$(BUILDDIR):$(PATH)" _build/test/test.native test/ocaml.svg
-else
-	LD_LIBRARY_PATH=$(BUILDDIR) _build/test/test.native test/ocaml.svg
-endif
-
-.PHONY: test
