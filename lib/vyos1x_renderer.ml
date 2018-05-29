@@ -16,6 +16,10 @@
    at set command validation and formatting time, I reused the ephemeral flag
    which is never used in VyOS 1.x for marking nodes as tag nodes at parsing time.
 
+   Note that if non-leaf nodes have values, they will be rendered in _some_ way.
+   Such a config would never appear in a live VyOS and cannot load, so this case
+   is considered undefined behaviour.
+
  *)
 
 module CT = Config_tree
@@ -51,7 +55,7 @@ let rec render_node indent level node =
     | _ ->
         if is_tag then 
             begin
-                let inner = List.map (render_tag_node indent level name) children in
+                let inner = List.map (render_tag_node_child indent level name) children in
                 String.concat "" inner
             end
         else
@@ -61,7 +65,8 @@ let rec render_node indent level node =
                 Printf.sprintf "%s%s%s {\n%s%s}\n" comment indent_str name inner indent_str
             end
 
-and render_tag_node indent level parent node =
+
+and render_tag_node_child indent level parent node =
     let open CT in
     let indent_str = make_indent indent level in
     let name = VT.name_of_node node in
@@ -70,7 +75,9 @@ and render_tag_node indent level parent node =
     let values = render_values indent_str name data.values in
     let children = VT.children_of_node node in
     match children with
-    | [] -> Printf.sprintf "%s\n%s" comment values
+    (* This produces too much whitespace due to indent_str from values,
+       but the issue is cosmetic *)
+    | [] -> Printf.sprintf "%s%s%s %s" comment indent_str parent values
     | _ ->
         (* Exploiting the fact that immediate children of tag nodes are
            never themselves tag nodes *)
@@ -83,5 +90,4 @@ let render node =
     let child_configs = List.map (render_node 4 0) children in
     String.concat "" child_configs
      
-
     
