@@ -35,7 +35,7 @@
 
 (* If there are multiple comments before a node, consider the last one its real comment *)
 comments: 
-    cs = list(COMMENT) { match cs with [] -> None | _ -> Some (List.rev cs |> List.hd) }
+    cs = list(COMMENT) { match cs with [] -> None | _ -> Some (List.rev cs |> List.hd |> String.trim) }
 
 value:
   | v = STRING
