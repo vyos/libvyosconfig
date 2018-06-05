@@ -19,6 +19,9 @@ let from_string s =
 let render c_ptr =
     Vyos1x_renderer.render (Root.get c_ptr)
 
+let render_commands c_ptr =
+    CT.render_commands ~alwayssort:true ~sortchildren:true (Root.get c_ptr) []
+
 let set_add_value c_ptr path value =
     let ct = Root.get c_ptr in
     let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
@@ -115,6 +118,7 @@ struct
   let () = I.internal "destroy" ((ptr void) @-> returning void) destroy
   let () = I.internal "from_string" (string @-> returning (ptr void)) from_string 
   let () = I.internal "to_string"  ((ptr void) @-> returning string) render
+  let () = I.internal "to_commands" ((ptr void) @-> returning string) render_commands
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
   let () = I.internal "set_replace_value" ((ptr void) @-> string @-> string @-> returning int) set_replace_value
   let () = I.internal "set_valueless" ((ptr void) @-> string @-> returning int) set_valueless
