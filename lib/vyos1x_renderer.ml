@@ -30,9 +30,9 @@ let make_indent indent level = String.make (level * indent) ' '
 let render_values indent_str name values =
     match values with
     | [] -> Printf.sprintf "%s%s { }\n" indent_str name
-    | [v] -> Printf.sprintf "%s%s \"%s\"\n" indent_str name v
+    | [v] -> Printf.sprintf "%s%s \"%s\"\n" indent_str name (String.escaped v)
     | _  -> 
-        let rendered = List.map (fun s -> Printf.sprintf "%s%s \"%s\"" indent_str name s) values in
+        let rendered = List.map (fun s -> Printf.sprintf "%s%s \"%s\"" indent_str name (String.escaped s)) values in
         let rendered = String.concat "\n" rendered in
         Printf.sprintf "%s\n" rendered
 
