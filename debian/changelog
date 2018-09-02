@@ -1,3 +1,9 @@
+libvyosconfig0 (0.0.2) unstable; urgency=medium
+
+  * Add support for node renaming.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 02 Sep 2018 13:04:28 +0200
+
 libvyosconfig0 (0.0.1) unstable; urgency=low
 
   * Created the package
