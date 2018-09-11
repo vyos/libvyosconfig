@@ -3,6 +3,9 @@ open Foreign
 
 module CT = Config_tree
 
+
+let error_message = ref ""
+
 let to_json_str = fun s -> `String s
 
 let make_config_tree name = Ctypes.Root.create (CT.make name)
@@ -12,9 +15,14 @@ let destroy c_ptr =
 
 let from_string s = 
     try
+        error_message := "";
         let config = Vyos1x_parser.config Vyos1x_lexer.token (Lexing.from_string s) in
         Ctypes.Root.create config
-    with _ -> Ctypes.null
+    with
+    | Failure s | Vyos1x_lexer.Error s -> error_message := s; Ctypes.null
+    | _ -> error_message := "Parse error"; Ctypes.null
+
+let get_error () = !error_message
 
 let render c_ptr =
     Vyos1x_renderer.render (Root.get c_ptr)
@@ -124,7 +132,8 @@ struct
 
   let () = I.internal "make" (string @-> returning (ptr void)) make_config_tree
   let () = I.internal "destroy" ((ptr void) @-> returning void) destroy
-  let () = I.internal "from_string" (string @-> returning (ptr void)) from_string 
+  let () = I.internal "from_string" (string @-> returning (ptr void)) from_string
+  let () = I.internal "get_error" (void @-> returning string) get_error
   let () = I.internal "to_string"  ((ptr void) @-> returning string) render
   let () = I.internal "to_commands" ((ptr void) @-> returning string) render_commands
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
