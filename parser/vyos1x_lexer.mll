@@ -66,7 +66,7 @@ rule token = parse
     { vy_inside_node := false; LEFT_BRACE }
 | '}'
     { vy_inside_node := false; RIGHT_BRACE }
-| [^ ' ' '\t' '\n' '\r' '{' '}' '[' ']' ';' '#' '"' ''' ]+ as s
+| [^ ' ' '\t' '\n' '\r' '{' '}' '"' ''' ]+ as s
     { vy_inside_node := true; IDENTIFIER s}
 | eof
     { EOF }
