@@ -1,3 +1,9 @@
+libvyosconfig0 (0.0.4) unstable; urgency=medium
+
+  * Escape special characters in config commands output.
+
+ -- Daniil Baturin <daniil@baturin.org>  Thu, 29 Nov 2018 01:26:32 +0100
+
 libvyosconfig0 (0.0.3) unstable; urgency=medium
 
   * Allow all characters except braces, quotes, and whitespace in identifiers.
