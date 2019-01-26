@@ -1,3 +1,9 @@
+libvyosconfig0 (0.0.6) unstable; urgency=medium
+
+  * Allow top level leaf and tag nodes.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sat, 26 Jan 2019 01:29:48 +0100
+
 libvyosconfig0 (0.0.4) unstable; urgency=medium
 
   * Escape special characters in config commands output.
