@@ -126,6 +126,16 @@ let return_values c_ptr path =
         Yojson.Safe.to_string values_json
     with _ -> Yojson.Safe.to_string `Null
 
+let copy_node c_ptr old_path new_path =
+    let ct = Root.get c_ptr in
+    let old_path = Pcre.split ~rex:(Pcre.regexp "\\s+") old_path in
+    let new_path = Pcre.split ~rex:(Pcre.regexp "\\s+") new_path in
+    try
+        let new_ct = Vytree.copy ct old_path new_path in
+        Root.set c_ptr new_ct;
+        0
+    with Vytree.Nonexistent_path -> 1
+
 
 module Stubs(I : Cstubs_inverted.INTERNAL) =
 struct
@@ -142,11 +152,11 @@ struct
   let () = I.internal "delete_value" ((ptr void) @-> string @-> string @-> returning int) delete_value
   let () = I.internal "delete_node" ((ptr void) @-> string @-> returning int) delete_node
   let () = I.internal "rename_node" ((ptr void) @-> string @-> string @-> returning int) rename_node
+  let () = I.internal "copy_node" ((ptr void) @-> string @-> string @-> returning int) copy_node
   let () = I.internal "set_tag" ((ptr void) @-> string @-> returning int) set_tag
   let () = I.internal "is_tag"	((ptr void) @->	string @-> returning int) is_tag
   let () = I.internal "exists"  ((ptr void) @-> string @-> returning int) exists
   let () = I.internal "list_nodes" ((ptr void) @-> string @-> returning string) list_nodes
   let () = I.internal "return_value" ((ptr void) @-> string @-> returning string) return_value
   let () = I.internal "return_values" ((ptr void) @-> string @-> returning string) return_values
-
 end
