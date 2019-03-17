@@ -45,14 +45,20 @@ value:
 ;
 
 
-leaf_node:
+leaf_node_body:
   | comment = comments;
-    name = IDENTIFIER; value = value; NEWLINE;
+    name = IDENTIFIER; value = value;
     { Vytree.make_full {default_data with values=[value]; comment=comment} name []}
   | comment = comments;
-    name = IDENTIFIER; NEWLINE (* valueless node *)
+    name = IDENTIFIER; (* valueless node *)
     { Vytree.make_full {default_data with comment=comment} name [] }
 ;
+
+leaf_node:
+  | n = leaf_node_body; NEWLINE;
+    { n }
+  | n = leaf_node_body; EOF;
+    { n }
 
 node:
   | comment = comments;
