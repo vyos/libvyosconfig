@@ -1,10 +1,17 @@
 open Ctypes
 open Foreign
 
+open Vyos1x
+
 module CT = Config_tree
 
-
 let error_message = ref ""
+
+let make_syntax_error pos err =
+  match pos with
+  | None -> Printf.sprintf "Syntax error: %s" err
+  | Some (l, c) ->
+    Printf.sprintf "Syntax error on line %d, character %d: %s" l c err
 
 let to_json_str = fun s -> `String s
 
@@ -14,21 +21,24 @@ let destroy c_ptr =
     Root.release c_ptr
 
 let from_string s = 
-    try
-        error_message := "";
-        let config = Vyos1x_parser.config Vyos1x_lexer.token (Lexing.from_string s) in
-        Ctypes.Root.create config
-    with
-    | Failure s | Vyos1x_lexer.Error s -> error_message := s; Ctypes.null
+  try
+    error_message := "";
+    let config = Parser.from_string s in
+    Ctypes.Root.create config
+  with
+    | Failure s -> error_message := s; Ctypes.null
+    | Util.Syntax_error (pos, err) ->
+      let msg = make_syntax_error pos err in
+      error_message := msg; Ctypes.null
     | _ -> error_message := "Parse error"; Ctypes.null
 
 let get_error () = !error_message
 
-let render c_ptr =
-    Vyos1x_renderer.render (Root.get c_ptr)
+let render_config c_ptr =
+    CT.render_config (Root.get c_ptr)
 
 let render_commands c_ptr =
-    CT.render_commands ~alwayssort:true ~sortchildren:true (Root.get c_ptr) []
+    CT.render_commands (Root.get c_ptr) []
 
 let set_add_value c_ptr path value =
     let ct = Root.get c_ptr in
@@ -84,14 +94,14 @@ let set_tag c_ptr path =
     let ct = Root.get c_ptr in
     let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
     try
-        Root.set c_ptr (CT.set_ephemeral ct path true);
+        Root.set c_ptr (CT.set_tag ct path true);
         0 (* return 0 *)
     with _ -> 1
 
 let is_tag c_ptr path =
     let ct = Root.get c_ptr in
     let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
-    if (CT.is_ephemeral ct path) then 1 else 0
+    if (CT.is_tag ct path) then 1 else 0
 
 let exists c_ptr path =
     let ct = Root.get c_ptr in
@@ -144,7 +154,7 @@ struct
   let () = I.internal "destroy" ((ptr void) @-> returning void) destroy
   let () = I.internal "from_string" (string @-> returning (ptr void)) from_string
   let () = I.internal "get_error" (void @-> returning string) get_error
-  let () = I.internal "to_string"  ((ptr void) @-> returning string) render
+  let () = I.internal "to_string"  ((ptr void) @-> returning string) render_config
   let () = I.internal "to_commands" ((ptr void) @-> returning string) render_commands
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
   let () = I.internal "set_replace_value" ((ptr void) @-> string @-> string @-> returning int) set_replace_value
