@@ -1,3 +1,11 @@
+libvyosconfig0 (0.0.9) unstable; urgency=medium
+
+  * Proper reporting of syntax error line number and character position.
+  * Correct handling of strings in single quotes.
+  * Switched from linking to vyconf to a dedicated lib.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sat, 29 Jun 2019 23:37:27 +0200
+
 libvyosconfig0 (0.0.8) unstable; urgency=medium
 
   * Allow configs to end with leaf nodes.
