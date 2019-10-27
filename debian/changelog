@@ -1,3 +1,9 @@
+libvyosconfig0 (0.0.10) unstable; urgency=medium
+
+  * Expose JSON rendering functions.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 27 Oct 2019 14:38:08 +0100
+
 libvyosconfig0 (0.0.9) unstable; urgency=medium
 
   * Proper reporting of syntax error line number and character position.

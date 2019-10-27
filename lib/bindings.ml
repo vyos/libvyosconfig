@@ -37,6 +37,12 @@ let get_error () = !error_message
 let render_config c_ptr =
     CT.render_config (Root.get c_ptr)
 
+let render_json c_ptr =
+    CT.render_json (Root.get c_ptr)
+
+let render_json_ast c_ptr =
+    CT.render_json_ast (Root.get c_ptr)
+
 let render_commands c_ptr =
     CT.render_commands (Root.get c_ptr) []
 
@@ -155,6 +161,8 @@ struct
   let () = I.internal "from_string" (string @-> returning (ptr void)) from_string
   let () = I.internal "get_error" (void @-> returning string) get_error
   let () = I.internal "to_string"  ((ptr void) @-> returning string) render_config
+  let () = I.internal "to_json" ((ptr void) @-> returning string) render_json
+  let () = I.internal "to_json_ast" ((ptr void) @-> returning string) render_json_ast
   let () = I.internal "to_commands" ((ptr void) @-> returning string) render_commands
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
   let () = I.internal "set_replace_value" ((ptr void) @-> string @-> string @-> returning int) set_replace_value
