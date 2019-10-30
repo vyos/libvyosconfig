@@ -100,7 +100,7 @@ pipeline {
                         def commitId = sh(returnStdout: true, script: 'git rev-parse --short=11 HEAD').trim()
                         currentBuild.description = sprintf('Git SHA1: %s', commitId[-11..-1])
 
-                        sh 'dpkg-buildpackage -b -us -uc -tc'
+                        sh 'eval $(opam env --root=/opt/opam --set-root) && dpkg-buildpackage -b -us -uc -tc'
                     }
                 }
             }
