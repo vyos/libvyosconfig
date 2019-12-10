@@ -1,3 +1,9 @@
+libvyosconfig (1.2.4) unstable; urgency=low
+
+  * New release.
+
+ -- VyOS maintainers <maintainers@vyos.io>  Tue, 10 Dec 2019 23:40:05 +0200
+
 libvyosconfig0 (0.0.10) unstable; urgency=medium
 
   * Expose JSON rendering functions.
@@ -53,4 +59,3 @@ libvyosconfig0 (0.0.1) unstable; urgency=low
   * Created the package
 
  -- Daniil Baturin <daniil@baturin.org>  Wed, 23 May 2018 21:14:46 +0200
-
