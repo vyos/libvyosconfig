@@ -100,7 +100,6 @@ pipeline {
                     dir('build') {
                         def commitId = sh(returnStdout: true, script: 'git rev-parse --short=11 HEAD').trim()
                         currentBuild.description = sprintf('Git SHA1: %s', commitId[-11..-1])
-
                         sh 'eval $(opam env --root=/opt/opam --set-root) && dpkg-buildpackage -b -us -uc -tc'
                     }
                 }
@@ -121,11 +120,12 @@ pipeline {
                     sshagent(['SSH-dev.packages.vyos.net']) {
                         // build up some fancy groovy variables so we do not need to write/copy
                         // every option over and over again!
+                        def RELEASE = getGitBranchName()
+                        if (getGitBranchName() == "master") {
+                            RELEASE = 'current'
+                        }
 
-                        def VYOS_REPO_PATH = '/home/sentrium/web/dev.packages.vyos.net/public_html/repositories/' + getGitBranchName() + '/'
-                        if (getGitBranchName() != "equuleus")
-                            VYOS_REPO_PATH += 'vyos/'
-
+                        def VYOS_REPO_PATH = '/home/sentrium/web/dev.packages.vyos.net/public_html/repositories/' + RELEASE + '/'
                         def SSH_OPTS = '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR'
                         def SSH_REMOTE = 'khagen@10.217.48.113'
 
@@ -133,7 +133,6 @@ pipeline {
 
                         files = findFiles(glob: '*.deb')
                         files.each { PACKAGE ->
-                            def RELEASE = getGitBranchName()
                             def ARCH = sh(returnStdout: true, script: "dpkg-deb -f ${PACKAGE} Architecture").trim()
                             def SUBSTRING = sh(returnStdout: true, script: "dpkg-deb -f ${PACKAGE} Package").trim()
                             def SSH_DIR = '~/VyOS/' + RELEASE + '/' + ARCH
