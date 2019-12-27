@@ -69,11 +69,20 @@ def projectProperties = [
 properties(projectProperties)
 setDescription()
 
+node('Docker') {
+    stage('Define Agent') {
+        script {
+            // create container name on demand
+            env.DOCKER_IMAGE = "vyos/vyos-build:" + getGitBranchName()
+        }
+    }
+}
+
 pipeline {
     agent {
         docker {
-            args '--sysctl net.ipv6.conf.lo.disable_ipv6=0 -e GOSU_UID=1006 -e GOSU_GID=1006'
-            image 'vyos/vyos-build:current'
+            args "--sysctl net.ipv6.conf.lo.disable_ipv6=0 -e GOSU_UID=1006 -e GOSU_GID=1006"
+            image "${env.DOCKER_IMAGE}"
             alwaysPull true
         }
     }
@@ -100,6 +109,7 @@ pipeline {
                     dir('build') {
                         def commitId = sh(returnStdout: true, script: 'git rev-parse --short=11 HEAD').trim()
                         currentBuild.description = sprintf('Git SHA1: %s', commitId[-11..-1])
+
                         sh 'eval $(opam env --root=/opt/opam --set-root) && dpkg-buildpackage -b -us -uc -tc'
                     }
                 }
@@ -126,6 +136,9 @@ pipeline {
                         }
 
                         def VYOS_REPO_PATH = '/home/sentrium/web/dev.packages.vyos.net/public_html/repositories/' + RELEASE + '/'
+                        if (getGitBranchName() == "crux")
+                            VYOS_REPO_PATH += 'vyos/'
+
                         def SSH_OPTS = '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR'
                         def SSH_REMOTE = 'khagen@10.217.48.113'
 
