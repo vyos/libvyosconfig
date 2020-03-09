@@ -1,3 +1,9 @@
+libvyosconfig/ (1.2.5) unstable; urgency=low
+
+  * New release.
+
+ -- VyOS maintainers <maintainers@vyos.io>  Mon, 09 Mar 2020 18:40:46 +0200
+
 libvyosconfig (1.2.4) unstable; urgency=low
 
   * New release.
