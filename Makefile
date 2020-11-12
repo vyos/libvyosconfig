@@ -2,7 +2,7 @@ BUILDDIR=_build
 VPATH=$(BUILDDIR)
 OCAMLDIR=$(shell ocamlopt -where)
 $(shell mkdir -p $(BUILDDIR) $(BUILDDIR)/stub $(BUILDDIR)/lib $(BUILDDIR)/stub_generator $(BUILDDIR)/test $(BUILDDIR)/generated)
-PACKAGES=vyos1x-config,pcre,ctypes.stubs,ctypes.foreign
+PACKAGES=vyos1x-config,re,ctypes.stubs,ctypes.foreign
 
 GENERATOR_FILES=$(BUILDDIR)/lib/bindings.cmx \
                 $(BUILDDIR)/stub_generator/generate.cmx

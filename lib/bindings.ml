@@ -15,6 +15,8 @@ let make_syntax_error pos err =
 
 let to_json_str = fun s -> `String s
 
+let split_on_whitespace s = Re.split (Re.Perl.compile_pat "\\s+") s
+
 let make_config_tree name = Ctypes.Root.create (CT.make name)
 
 let destroy c_ptr = 
@@ -48,7 +50,7 @@ let render_commands c_ptr =
 
 let set_add_value c_ptr path value =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     try
         let new_ct = CT.set ct path (Some value) CT.AddValue in
         Root.set c_ptr new_ct;
@@ -57,14 +59,14 @@ let set_add_value c_ptr path value =
 
 let set_replace_value c_ptr path value =
     let	ct = Root.get c_ptr in
-    let	path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let	path = split_on_whitespace path in
     let new_ct = Config_tree.set ct path (Some value) Config_tree.ReplaceValue in
     Root.set c_ptr new_ct;
     0 (* return 0 *)
 
 let set_valueless c_ptr path =
     let	ct = Root.get c_ptr in
-    let	path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let	path = split_on_whitespace path in
     try
         let new_ct = Config_tree.set ct path None CT.AddValue in
         Root.set c_ptr new_ct;
@@ -73,7 +75,7 @@ let set_valueless c_ptr path =
 
 let delete_value c_ptr path value =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     try
         let new_ct = CT.delete ct path (Some value) in
         Root.set c_ptr new_ct;
@@ -82,7 +84,7 @@ let delete_value c_ptr path value =
 
 let delete_node c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     if not (Vytree.exists ct path) then 1 else
     let new_ct = Config_tree.delete ct path None in
     Root.set c_ptr new_ct;
@@ -90,7 +92,7 @@ let delete_node c_ptr path =
 
 let rename_node c_ptr path newname =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     if not (Vytree.exists ct path) then 1 else
     let new_ct = Vytree.rename ct path newname in
     Root.set c_ptr new_ct;
@@ -98,7 +100,7 @@ let rename_node c_ptr path newname =
 
 let set_tag c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     try
         Root.set c_ptr (CT.set_tag ct path true);
         0 (* return 0 *)
@@ -106,17 +108,17 @@ let set_tag c_ptr path =
 
 let is_tag c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     if (CT.is_tag ct path) then 1 else 0
 
 let exists c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     if (Vytree.exists ct path) then 1 else 0
 
 let list_nodes c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     try
         let nodes = Vytree.children_of_path ct path in
         let nodes_json = `List (List.map to_json_str nodes) in
@@ -125,7 +127,7 @@ let list_nodes c_ptr path =
 
 let return_value c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     try
         Yojson.Safe.to_string (`String (CT.get_value ct path))
     with
@@ -134,7 +136,7 @@ let return_value c_ptr path =
 
 let return_values c_ptr path =
     let ct = Root.get c_ptr in
-    let path = Pcre.split ~rex:(Pcre.regexp "\\s+") path in
+    let path = split_on_whitespace path in
     let to_json_str = fun s -> `String s in
     try
        	let values = CT.get_values ct path in
@@ -144,8 +146,8 @@ let return_values c_ptr path =
 
 let copy_node c_ptr old_path new_path =
     let ct = Root.get c_ptr in
-    let old_path = Pcre.split ~rex:(Pcre.regexp "\\s+") old_path in
-    let new_path = Pcre.split ~rex:(Pcre.regexp "\\s+") new_path in
+    let old_path = split_on_whitespace old_path in
+    let new_path = split_on_whitespace new_path in
     try
         let new_ct = Vytree.copy ct old_path new_path in
         Root.set c_ptr new_ct;
