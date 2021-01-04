@@ -1,3 +1,9 @@
+libvyosconfig0 (1.3-1) unstable; urgency=medium
+
+  * New LTS branch.
+
+ -- Daniil Baturin <daniil@vyos.io>  Mon, 04 Jan 2021 16:44:10 +0200
+
 libvyosconfig0 (0.0.10) unstable; urgency=medium
 
   * Expose JSON rendering functions.
