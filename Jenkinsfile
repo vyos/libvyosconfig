@@ -18,7 +18,7 @@
 // Using a version specifier library, use 'current' branch. The underscore (_)
 // is not a typo! You need this underscore if the line immediately after the
 // @Library annotation is not an import statement!
-@Library('vyos-build@current')_
+@Library('vyos-build@crux')_
 
 // Start package build using library function from https://github.com/c-po/vyos-build
 def buildCmd = "eval \$(opam env --root=/opt/opam --set-root) && dpkg-buildpackage -b -us -uc -tc"
