@@ -11,7 +11,7 @@ two high level languages so it would be very inconvenient to use from C.
 
 ## Building
 
-You need to install OPAM and then use it to install OCaml (latest 4.08 works fine).
+You need to install OPAM and then use it to install OCaml (4.08 or later, latest 4.12 works fine).
 
 
 ```
