@@ -20,4 +20,5 @@
 @Library('vyos-build@current')_
 
 // Start package build using library function from https://github.com/vyos/vyos-build
-buildPackage(null, null, null, true)
+def buildCmd = "eval \$(opam env --root=/opt/opam --set-root) && dpkg-buildpackage -b -us -uc -tc"
+buildPackage(null, null, buildCmd, true)
