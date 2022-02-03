@@ -45,7 +45,7 @@ $(BUILDDIR)/libvyosconfig$(EXTDLL): $(CAML_INIT) $(LIBFILES)
 	ocamlfind opt -o $@ -linkpkg -runtime-variant _pic -verbose -ccopt -dynamiclib -package $(PACKAGES) $^
 else
 $(BUILDDIR)/libvyosconfig$(EXTDLL): $(CAML_INIT) $(LIBFILES)
-	ocamlfind opt -o $@ -linkpkg -output-obj -runtime-variant _pic -verbose -package $(PACKAGES) -ccopt "-Wl,-soname,libvyosconfig.so.0" $^
+	ocamlfind opt -o $@ -linkpkg -output-obj -runtime-variant _pic -verbose -thread -package $(PACKAGES) -ccopt "-Wl,-soname,libvyosconfig.so.0" $^
 endif
 
 stubs: $(GENERATED)
@@ -64,7 +64,7 @@ $(BUILDDIR)/%.cmx: %.ml
 	ocamlfind opt -c -o $@ -I $(BUILDDIR)/generated -I $(BUILDDIR)/lib -package $(PACKAGES) $<
 
 $(GENERATOR): $(GENERATOR_FILES)
-	ocamlfind opt -o $@ -I $(BUILDDIR)/lib -linkpkg -package $(PACKAGES) $^
+	ocamlfind opt -o $@ -I $(BUILDDIR)/lib -linkpkg -thread -package $(PACKAGES) $^
 
 clean:
 	rm -rf $(BUILDDIR)
