@@ -46,8 +46,12 @@ let render_json c_ptr =
 let render_json_ast c_ptr =
     CT.render_json_ast (Root.get c_ptr)
 
-let render_commands c_ptr =
-    CT.render_commands (Root.get c_ptr) []
+let render_commands c_ptr op =
+    match op with
+    | "delete" ->
+            CT.render_commands ~op:CT.Delete (Root.get c_ptr) []
+    | _ ->
+            CT.render_commands ~op:CT.Set (Root.get c_ptr) []
 
 let set_add_value c_ptr path value =
     let ct = Root.get c_ptr in
@@ -180,7 +184,7 @@ struct
   let () = I.internal "to_string"  ((ptr void) @-> returning string) render_config
   let () = I.internal "to_json" ((ptr void) @-> returning string) render_json
   let () = I.internal "to_json_ast" ((ptr void) @-> returning string) render_json_ast
-  let () = I.internal "to_commands" ((ptr void) @-> returning string) render_commands
+  let () = I.internal "to_commands" ((ptr void) @-> string @-> returning string) render_commands
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
   let () = I.internal "set_replace_value" ((ptr void) @-> string @-> string @-> returning int) set_replace_value
   let () = I.internal "set_valueless" ((ptr void) @-> string @-> returning int) set_valueless
