@@ -165,20 +165,16 @@ let copy_node c_ptr old_path new_path =
         0
     with Vytree.Nonexistent_path -> 1
 
-let diffs path c_ptr_l c_ptr_r =
+let diff_tree path c_ptr_l c_ptr_r =
     let path = split_on_whitespace path in
     let ct_l = Root.get c_ptr_l in
     let ct_r = Root.get c_ptr_r in
     try
-        let ct_add, ct_del, ct_inter = CD.diffs path ct_l ct_r in
-        let ptr_add = Ctypes.Root.create ct_add in
-        let ptr_del = Ctypes.Root.create ct_del in
-        let ptr_inter = Ctypes.Root.create ct_inter in
-        let ptr_arr = Ctypes.CArray.make (ptr void) ~initial:ptr_add 3 in Ctypes.CArray.set ptr_arr 1 ptr_del; Ctypes.CArray.set ptr_arr 2 ptr_inter; Ctypes.CArray.start ptr_arr
-
+        let ct_ret = CD.diff_tree path ct_l ct_r in
+        Ctypes.Root.create ct_ret
     with
-        | CD.Incommensurable -> error_message := "Incommensurable"; Ctypes.CArray.start (Ctypes.CArray.make (ptr void) 3)
-        | CD.Empty_comparison -> error_message := "Empty comparison"; Ctypes.CArray.start (Ctypes.CArray.make (ptr void) 3)
+        | CD.Incommensurable -> error_message := "Incommensurable"; Ctypes.null
+        | CD.Empty_comparison -> error_message := "Empty comparison"; Ctypes.null
 
 module Stubs(I : Cstubs_inverted.INTERNAL) =
 struct
@@ -205,5 +201,5 @@ struct
   let () = I.internal "list_nodes" ((ptr void) @-> string @-> returning string) list_nodes
   let () = I.internal "return_value" ((ptr void) @-> string @-> returning string) return_value
   let () = I.internal "return_values" ((ptr void) @-> string @-> returning string) return_values
-  let () = I.internal "diffs" (string @-> (ptr void) @-> (ptr void)  @-> returning (ptr (ptr void))) diffs
+  let () = I.internal "diff_tree" (string @-> (ptr void) @-> (ptr void) @-> returning (ptr void)) diff_tree
 end
