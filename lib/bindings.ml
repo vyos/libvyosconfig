@@ -116,6 +116,12 @@ let is_tag c_ptr path =
     let path = split_on_whitespace path in
     if (CT.is_tag ct path) then 1 else 0
 
+let get_subtree c_ptr path with_node =
+    let ct = Root.get c_ptr in
+    let path = split_on_whitespace path in
+    let subt = CT.get_subtree ~with_node:with_node ct path in
+    Ctypes.Root.create subt
+
 let exists c_ptr path =
     let ct = Root.get c_ptr in
     let path = split_on_whitespace path in
@@ -194,6 +200,7 @@ struct
   let () = I.internal "copy_node" ((ptr void) @-> string @-> string @-> returning int) copy_node
   let () = I.internal "set_tag" ((ptr void) @-> string @-> returning int) set_tag
   let () = I.internal "is_tag"	((ptr void) @->	string @-> returning int) is_tag
+  let () = I.internal "get_subtree" ((ptr void) @-> string @-> bool @-> returning (ptr void)) get_subtree
   let () = I.internal "exists"  ((ptr void) @-> string @-> returning int) exists
   let () = I.internal "list_nodes" ((ptr void) @-> string @-> returning string) list_nodes
   let () = I.internal "return_value" ((ptr void) @-> string @-> returning string) return_value
