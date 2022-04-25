@@ -4,6 +4,7 @@ open Foreign
 open Vyos1x
 
 module CT = Config_tree
+module CD = Config_diff
 
 let error_message = ref ""
 
@@ -45,8 +46,12 @@ let render_json c_ptr =
 let render_json_ast c_ptr =
     CT.render_json_ast (Root.get c_ptr)
 
-let render_commands c_ptr =
-    CT.render_commands (Root.get c_ptr) []
+let render_commands c_ptr op =
+    match op with
+    | "delete" ->
+            CT.render_commands ~op:CT.Delete (Root.get c_ptr) []
+    | _ ->
+            CT.render_commands ~op:CT.Set (Root.get c_ptr) []
 
 let set_add_value c_ptr path value =
     let ct = Root.get c_ptr in
@@ -111,6 +116,12 @@ let is_tag c_ptr path =
     let path = split_on_whitespace path in
     if (CT.is_tag ct path) then 1 else 0
 
+let get_subtree c_ptr path with_node =
+    let ct = Root.get c_ptr in
+    let path = split_on_whitespace path in
+    let subt = CT.get_subtree ~with_node:with_node ct path in
+    Ctypes.Root.create subt
+
 let exists c_ptr path =
     let ct = Root.get c_ptr in
     let path = split_on_whitespace path in
@@ -154,6 +165,26 @@ let copy_node c_ptr old_path new_path =
         0
     with Vytree.Nonexistent_path -> 1
 
+let diff_tree path c_ptr_l c_ptr_r =
+    let path = split_on_whitespace path in
+    let ct_l = Root.get c_ptr_l in
+    let ct_r = Root.get c_ptr_r in
+    try
+        let ct_ret = CD.diff_tree path ct_l ct_r in
+        Ctypes.Root.create ct_ret
+    with
+        | CD.Incommensurable -> error_message := "Incommensurable"; Ctypes.null
+        | CD.Empty_comparison -> error_message := "Empty comparison"; Ctypes.null
+
+let trim_tree c_ptr_l c_ptr_r =
+    let ct_l = Root.get c_ptr_l in
+    let ct_r = Root.get c_ptr_r in
+    try
+        let ct_ret = CD.trim_tree ct_l ct_r in
+        Ctypes.Root.create ct_ret
+    with
+        | CD.Incommensurable -> error_message := "Incommensurable"; Ctypes.null
+        | CD.Empty_comparison -> error_message := "Empty comparison"; Ctypes.null
 
 module Stubs(I : Cstubs_inverted.INTERNAL) =
 struct
@@ -165,7 +196,7 @@ struct
   let () = I.internal "to_string"  ((ptr void) @-> returning string) render_config
   let () = I.internal "to_json" ((ptr void) @-> returning string) render_json
   let () = I.internal "to_json_ast" ((ptr void) @-> returning string) render_json_ast
-  let () = I.internal "to_commands" ((ptr void) @-> returning string) render_commands
+  let () = I.internal "to_commands" ((ptr void) @-> string @-> returning string) render_commands
   let () = I.internal "set_add_value" ((ptr void) @-> string @-> string @-> returning int) set_add_value
   let () = I.internal "set_replace_value" ((ptr void) @-> string @-> string @-> returning int) set_replace_value
   let () = I.internal "set_valueless" ((ptr void) @-> string @-> returning int) set_valueless
@@ -175,8 +206,11 @@ struct
   let () = I.internal "copy_node" ((ptr void) @-> string @-> string @-> returning int) copy_node
   let () = I.internal "set_tag" ((ptr void) @-> string @-> returning int) set_tag
   let () = I.internal "is_tag"	((ptr void) @->	string @-> returning int) is_tag
+  let () = I.internal "get_subtree" ((ptr void) @-> string @-> bool @-> returning (ptr void)) get_subtree
   let () = I.internal "exists"  ((ptr void) @-> string @-> returning int) exists
   let () = I.internal "list_nodes" ((ptr void) @-> string @-> returning string) list_nodes
   let () = I.internal "return_value" ((ptr void) @-> string @-> returning string) return_value
   let () = I.internal "return_values" ((ptr void) @-> string @-> returning string) return_values
+  let () = I.internal "diff_tree" (string @-> (ptr void) @-> (ptr void) @-> returning (ptr void)) diff_tree
+  let () = I.internal "trim_tree" ((ptr void) @-> (ptr void) @-> returning (ptr void)) trim_tree
 end
