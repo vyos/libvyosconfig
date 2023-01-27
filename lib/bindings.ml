@@ -157,13 +157,18 @@ let return_values c_ptr path =
 
 let copy_node c_ptr old_path new_path =
     let ct = Root.get c_ptr in
+    let old_path_str = old_path in
     let old_path = split_on_whitespace old_path in
     let new_path = split_on_whitespace new_path in
     try
         let new_ct = Vytree.copy ct old_path new_path in
         Root.set c_ptr new_ct;
         0
-    with Vytree.Nonexistent_path -> 1
+    with
+    | Vytree.Nonexistent_path ->
+        let s = Printf.sprintf "Non-existent path \'%s\'" old_path_str in
+        error_message := s; 1
+    | Vytree.Insert_error s -> error_message := s; 1
 
 let diff_tree path c_ptr_l c_ptr_r =
     let path = split_on_whitespace path in
