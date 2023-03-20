@@ -37,8 +37,8 @@ let from_string s =
 
 let get_error () = !error_message
 
-let render_config c_ptr =
-    CT.render_config (Root.get c_ptr)
+let render_config c_ptr ord_val =
+    CT.render_config ~ord_val:ord_val (Root.get c_ptr)
 
 let render_json c_ptr =
     CT.render_json (Root.get c_ptr)
@@ -217,7 +217,7 @@ struct
   let () = I.internal "destroy" ((ptr void) @-> returning void) destroy
   let () = I.internal "from_string" (string @-> returning (ptr void)) from_string
   let () = I.internal "get_error" (void @-> returning string) get_error
-  let () = I.internal "to_string"  ((ptr void) @-> returning string) render_config
+  let () = I.internal "to_string"  ((ptr void) @-> bool @-> returning string) render_config
   let () = I.internal "to_json" ((ptr void) @-> returning string) render_json
   let () = I.internal "to_json_ast" ((ptr void) @-> returning string) render_json_ast
   let () = I.internal "to_commands" ((ptr void) @-> string @-> returning string) render_commands
