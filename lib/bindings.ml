@@ -210,6 +210,17 @@ let tree_union c_ptr_l c_ptr_r =
     with
         CD.Nonexistent_child -> error_message := "Nonexistent child"; Ctypes.null
 
+let reference_tree_to_json from_dir to_file =
+    try
+        Generate.reference_tree_to_json from_dir to_file; 0
+    with
+        | Generate.Load_error msg ->
+            let s = Printf.sprintf "Load_error \'%s\'" msg in
+            error_message := s; 1
+        | Generate.Write_error msg ->
+            let s = Printf.sprintf "Write_error \'%s\'" msg in
+            error_message := s; 1
+
 module Stubs(I : Cstubs_inverted.INTERNAL) =
 struct
 
@@ -239,4 +250,5 @@ struct
   let () = I.internal "trim_tree" ((ptr void) @-> (ptr void) @-> returning (ptr void)) trim_tree
   let () = I.internal "show_diff" (bool @-> string @-> (ptr void) @-> (ptr void) @-> returning string) show_diff
   let () = I.internal "tree_union" ((ptr void) @-> (ptr void) @-> returning (ptr void)) tree_union
+  let () = I.internal "reference_tree_to_json" (string @-> string @-> returning int) reference_tree_to_json
 end
