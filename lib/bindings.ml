@@ -85,7 +85,9 @@ let delete_value c_ptr path value =
         let new_ct = CT.delete ct path (Some value) in
         Root.set c_ptr new_ct;
         0 (* return 0 *)
-    with CT.No_such_value -> 1
+    with
+    | Vytree.Nonexistent_path -> 1
+    | CT.No_such_value -> 2
 
 let delete_node c_ptr path =
     let ct = Root.get c_ptr in
