@@ -213,6 +213,16 @@ let reference_tree_to_json from_dir to_file =
             let s = Printf.sprintf "Write_error \'%s\'" msg in
             error_message := s; 1
 
+let mask_tree c_ptr_l c_ptr_r =
+    let ct_l = Root.get c_ptr_l in
+    let ct_r = Root.get c_ptr_r in
+    try
+        let ct_ret = CD.mask_tree ct_l ct_r in
+        Ctypes.Root.create ct_ret
+    with
+        | CD.Incommensurable -> error_message := "Incommensurable"; Ctypes.null
+        | CD.Empty_comparison -> error_message := "Empty comparison"; Ctypes.null
+
 module Stubs(I : Cstubs_inverted.INTERNAL) =
 struct
 
@@ -242,4 +252,5 @@ struct
   let () = I.internal "show_diff" (bool @-> string @-> (ptr void) @-> (ptr void) @-> returning string) show_diff
   let () = I.internal "tree_union" ((ptr void) @-> (ptr void) @-> returning (ptr void)) tree_union
   let () = I.internal "reference_tree_to_json" (string @-> string @-> returning int) reference_tree_to_json
+  let () = I.internal "mask_tree" ((ptr void) @-> (ptr void) @-> returning (ptr void)) mask_tree
 end
